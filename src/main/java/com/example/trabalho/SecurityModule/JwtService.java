@@ -1,3 +1,4 @@
+
 package com.example.trabalho.SecurityModule;
 
 import io.jsonwebtoken.Claims;
@@ -48,7 +49,6 @@ public class JwtService {
 
     // Extrair o usuário identificado pelo token
     public String extractUsername(String token) {
-
         return extractClaims(token).getSubject();
     }
 
@@ -59,10 +59,10 @@ public class JwtService {
     ) {
 
         try {
-            String username = extractUsername(token);
+            Claims claims = extractClaims(token);
 
-            return username.equals(userDetails.getUsername())
-                    && extractClaims(token).getExpiration().after(new Date());
+            return claims.getSubject().equals(userDetails.getUsername())
+                    && claims.getExpiration().after(new Date());
 
         } catch (JwtException | IllegalArgumentException e) {
             return false;

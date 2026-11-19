@@ -2,8 +2,11 @@ package com.example.trabalho.SecurityModule;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -17,6 +20,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
 @Configuration
 @EnableWebSecurity
@@ -32,46 +36,63 @@ public class SecurityConfig {
             throws Exception {
 
         http
-                // Desabilita CSRF para API REST stateless
                 .csrf(csrf -> csrf.disable())
 
-                // Configuração das permissões das rotas
                 .authorizeHttpRequests(auth -> auth
 
-                        // Endpoints públicos: cadastro e login
                         .requestMatchers(
-                                "/api/auth/**",
-                                "/api/usuarios/cadastro",
-                                "/api/usuarios/login"
+                                HttpMethod.POST,
+                                "/api/auth/cadastro",
+                                "/api/auth/login",
+                                "/api/users"
                         ).permitAll()
 
-                        // Documentação da API (se utilizada)
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
 
-                        // Demais endpoints exigem autenticação
+                        // Console H2: liberar somente no ambiente de desenvolvimento.
+                        .requestMatchers("/h2-console/**").permitAll()
+
                         .anyRequest().authenticated()
                 )
 
-                // API REST sem armazenamento de sessão
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(
-                                SessionCreationPolicy.STATELESS
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(
+                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)
                         )
                 )
 
-                // Configuração do provedor de autenticação
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.sameOrigin())
+                )
+
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+
                 .authenticationProvider(authenticationProvider())
 
-                // Filtro JWT antes do filtro padrão de autenticação
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
                 );
 
         return http.build();
+    }
+
+    // Impede que o filtro JWT seja registrado duas vezes.
+    @Bean
+    public FilterRegistrationBean<JwtAuthenticationFilter>
+    jwtFilterRegistration(JwtAuthenticationFilter filter) {
+
+        FilterRegistrationBean<JwtAuthenticationFilter> registration =
+                new FilterRegistrationBean<>(filter);
+
+        registration.setEnabled(false);
+
+        return registration;
     }
 
     @Bean

@@ -1,10 +1,5 @@
-package com.example.trabalho.SecurityModule;
 
-import com.seuprojeto.auth.dto.LoginRequestDTO;
-import com.seuprojeto.auth.dto.CadastroRequestDTO;
-import com.seuprojeto.auth.dto.AuthResponseDTO;
-import com.seuprojeto.auth.dto.MessageResponseDTO;
-import com.seuprojeto.user.User;
+package com.example.trabalho.SecurityModule;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,13 +20,11 @@ public class AuthController {
     public ResponseEntity<MessageResponseDTO> cadastrar(
             @Valid @RequestBody CadastroRequestDTO dto) {
 
-        User user = new User();
-
-        user.setNome(dto.getNome());
-        user.setEmail(dto.getEmail());
-        user.setSenha(dto.getSenha());
-
-        authService.cadastrar(user);
+        authService.cadastrar(
+                dto.getNome(),
+                dto.getEmail(),
+                dto.getSenha()
+        );
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -63,11 +56,9 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<MessageResponseDTO> logout() {
 
-        authService.logout();
-
         return ResponseEntity.ok(
                 new MessageResponseDTO(
-                        "Logout realizado com sucesso!"
+                        "Logout solicitado. Remova o token armazenado no cliente."
                 )
         );
     }

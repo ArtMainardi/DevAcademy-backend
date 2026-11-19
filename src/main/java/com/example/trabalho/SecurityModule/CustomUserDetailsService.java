@@ -1,7 +1,8 @@
+
 package com.example.trabalho.SecurityModule;
 
-import com.seuprojeto.user.User;
-import com.seuprojeto.user.UserRepository;
+import com.example.trabalho.user.model.User;
+import com.example.trabalho.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,7 +21,6 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email)
             throws UsernameNotFoundException {
 
-        // Busca o usuário pelo email
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() ->
                         new UsernameNotFoundException(
@@ -28,22 +28,16 @@ public class CustomUserDetailsService implements UserDetailsService {
                         )
                 );
 
-        // Verifica se o usuário está ativo
-        if (!user.isAtivo()) {
+        if (!user.getActive()) {
             throw new UsernameNotFoundException(
                     "Usuário inativo: " + email
             );
         }
 
-        // Retorna os dados do usuário para o Spring Security
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getEmail())
-                .password(user.getSenha())
+                .password(user.getPassword())
                 .authorities("ROLE_USER")
-                .accountExpired(false)
-                .accountLocked(false)
-                .credentialsExpired(false)
-                .disabled(false)
                 .build();
     }
 }
