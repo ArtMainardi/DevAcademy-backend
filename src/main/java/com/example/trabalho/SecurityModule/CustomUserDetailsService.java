@@ -1,4 +1,4 @@
-package SecurityModule;
+package com.example.trabalho.SecurityModule;
 
 import com.seuprojeto.user.User;
 import com.seuprojeto.user.UserRepository;

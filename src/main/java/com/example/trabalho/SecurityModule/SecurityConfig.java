@@ -1,4 +1,4 @@
-package SecurityModule;
+package com.example.trabalho.SecurityModule;
 
 import com.seuprojeto.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
