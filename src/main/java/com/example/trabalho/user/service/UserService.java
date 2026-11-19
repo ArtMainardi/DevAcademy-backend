@@ -1,5 +1,11 @@
-package com.example.trabalho.user;
+package com.example.trabalho.user.service;
 
+import com.example.trabalho.user.model.ActivityHistory;
+import com.example.trabalho.user.model.User;
+import com.example.trabalho.user.model.UserSettings;
+import com.example.trabalho.user.repository.ActivityHistoryRepository;
+import com.example.trabalho.user.repository.UserRepository;
+import com.example.trabalho.user.repository.UserSettingsRepository;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.crypto.password.PasswordEncoder;

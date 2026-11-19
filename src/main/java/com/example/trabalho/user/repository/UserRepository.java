@@ -1,5 +1,6 @@
-package com.example.trabalho.user;
+package com.example.trabalho.user.repository;
 
+import com.example.trabalho.user.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
