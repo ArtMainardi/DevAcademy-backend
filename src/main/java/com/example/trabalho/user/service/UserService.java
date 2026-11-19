@@ -23,7 +23,7 @@ public class UserService {
     private final ActivityHistoryRepository activityHistoryRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // Cadastrar usuário
+    // Cadastrar usuário utilizando os dados individuais
     @Transactional
     public User createUser(
             String name,
@@ -53,6 +53,7 @@ public class UserService {
 
         userSettingsRepository.save(settings);
 
+        // Registrar atividade inicial
         registerActivity(
                 user,
                 "ACCOUNT_CREATED",
@@ -60,6 +61,17 @@ public class UserService {
         );
 
         return user;
+    }
+
+    // Cadastrar usuário utilizando uma entidade User
+    @Transactional
+    public User cadastrar(User user) {
+
+        return createUser(
+                user.getName(),
+                user.getEmail(),
+                user.getPassword()
+        );
     }
 
     // Buscar usuário por ID
