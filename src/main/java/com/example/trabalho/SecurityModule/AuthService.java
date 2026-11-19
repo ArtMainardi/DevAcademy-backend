@@ -1,9 +1,5 @@
 package com.example.trabalho.SecurityModule;
 
-import com.seuprojeto.user.User;
-import com.seuprojeto.user.UserRepository;
-import com.seuprojeto.user.UserService;
-
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.authentication.AuthenticationManager;
