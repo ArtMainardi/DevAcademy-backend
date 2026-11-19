@@ -8,6 +8,7 @@ import com.example.trabalho.user.service.UserService;
 import com.example.trabalho.user.service.UserSettingsService;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +21,21 @@ public class UserController {
 
     private final UserService userService;
     private final UserSettingsService userSettingsService;
+
+    @PostMapping
+    public ResponseEntity<UserResponseDTO> createUser(
+            @RequestBody UserCreateDTO dto) {
+
+        User user = userService.createUser(
+                dto.getName(),
+                dto.getEmail(),
+                dto.getPassword()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(toUserResponseDTO(user));
+    }
 
     // Consultar perfil do usuário
     @GetMapping("/{userId}")
@@ -83,6 +99,19 @@ public class UserController {
         );
 
         return ResponseEntity.ok(toSettingsDTO(settings));
+    }
+
+    private UserResponseDTO toUserResponseDTO(User user) {
+        return UserResponseDTO.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .biography(user.getBiography())
+                .profileImage(user.getProfileImage())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .active(user.getActive())
+                .build();
     }
 
     // Converter User para DTO
