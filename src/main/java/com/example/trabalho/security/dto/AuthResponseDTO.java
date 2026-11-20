@@ -14,4 +14,10 @@ public class AuthResponseDTO {
     private String tokenType;
 
     private Long expiresIn;
+
+    public AuthResponseDTO(String message, String token, String tokenType){
+        this.message = message;
+        this.token = token;
+        this.tokenType = tokenType;
+    }
 }
