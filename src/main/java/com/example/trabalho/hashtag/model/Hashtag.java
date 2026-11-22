@@ -1,4 +1,4 @@
-package com.plataforma.conhecimento.hashtag.entity;
+package com.example.trabalho.hashtag.model;
 
 import jakarta.persistence.*;
 import lombok.*;
