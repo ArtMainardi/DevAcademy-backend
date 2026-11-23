@@ -19,15 +19,12 @@ public class JwtService {
     private final SecretKey secretKey;
     private final long expiration;
 
-    public JwtService(
-            @Value("${jwt.secret}") String secret,
-            @Value("${jwt.expiration:86400000}") long expiration
-    ) {
+    public JwtService(JwtProperties jwtProperties) {
         this.secretKey = Keys.hmacShaKeyFor(
-                Decoders.BASE64.decode(secret)
+                Decoders.BASE64.decode(jwtProperties.getSecret())
         );
 
-        this.expiration = expiration;
+        this.expiration = jwtProperties.getExpiration();
     }
 
     /**
