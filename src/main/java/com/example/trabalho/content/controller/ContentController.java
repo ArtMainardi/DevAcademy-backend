@@ -112,6 +112,7 @@ public class ContentController {
         return ResponseEntity.noContent().build();
     }
 
+    @Transactional(readOnly = true)
     @GetMapping("/{id}/history")
     public ResponseEntity<List<ContentChangeDTO>> getChangeHistory(@PathVariable Long id) {
         List<ContentChangeDTO> history = contentService.getChangeHistory(id).stream()
