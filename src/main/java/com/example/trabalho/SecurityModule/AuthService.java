@@ -1,6 +1,8 @@
-package com.example.trabalho.security.service;
 
-import com.example.trabalho.security.jwt.JwtService;
+package com.example.trabalho.SecurityModule;
+
+import com.example.trabalho.user.model.User;
+import com.example.trabalho.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -14,16 +16,17 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthService {
 
+    private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
-    /**
-     * Realiza a autenticação do usuário e gera um token JWT.
-     *
-     * @param email email utilizado para autenticação
-     * @param senha senha informada pelo usuário
-     * @return token JWT gerado
-     */
+    // Cadastrar usuário
+    public User cadastrar(String nome, String email, String senha) {
+
+        return userService.createUser(nome, email, senha);
+    }
+
+    // Autenticar usuário e gerar token JWT
     public String autenticar(String email, String senha) {
 
         Authentication authentication =
@@ -38,14 +41,5 @@ public class AuthService {
                 (UserDetails) authentication.getPrincipal();
 
         return jwtService.generateToken(userDetails);
-    }
-
-    /**
-     * Retorna o tempo de validade do token JWT.
-     *
-     * @return tempo de validade em milissegundos
-     */
-    public long getExpiration() {
-        return jwtService.getExpiration();
     }
 }

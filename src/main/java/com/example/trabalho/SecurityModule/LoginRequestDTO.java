@@ -1,7 +1,9 @@
-package com.example.trabalho.security.dto;
+
+package com.example.trabalho.SecurityModule;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+
 import lombok.Getter;
 import lombok.Setter;
 

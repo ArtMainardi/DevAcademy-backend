@@ -1,7 +1,7 @@
-package com.example.trabalho.security.filter;
 
-import com.example.trabalho.security.jwt.JwtService;
-import com.example.trabalho.security.service.CustomUserDetailsService;
+package com.example.trabalho.SecurityModule;
+
+import io.jsonwebtoken.JwtException;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -24,7 +26,7 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final CustomUserDetailsService userDetailsService;
+    private final UserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(
@@ -33,28 +35,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        String authorizationHeader =
-                request.getHeader("Authorization");
+        final String authHeader = request.getHeader("Authorization");
 
-        if (authorizationHeader == null ||
-                !authorizationHeader.startsWith("Bearer ")) {
-
+        // Se não houver token, continua a requisição normalmente.
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = authorizationHeader.substring(7);
+        final String jwt = authHeader.substring(7);
 
         try {
-            String email = jwtService.extractUsername(token);
+            String username = jwtService.extractUsername(jwt);
 
-            if (email != null &&
+            if (username != null &&
                     SecurityContextHolder.getContext().getAuthentication() == null) {
 
                 UserDetails userDetails =
-                        userDetailsService.loadUserByUsername(email);
+                        userDetailsService.loadUserByUsername(username);
 
-                if (jwtService.isTokenValid(token, userDetails)) {
+                if (jwtService.isTokenValid(jwt, userDetails)) {
 
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(
@@ -73,7 +73,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
 
-        } catch (Exception exception) {
+        } catch (JwtException | IllegalArgumentException |
+                 UsernameNotFoundException e) {
+
             SecurityContextHolder.clearContext();
         }
 
