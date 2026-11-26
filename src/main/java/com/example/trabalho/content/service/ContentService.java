@@ -1,5 +1,6 @@
 package com.example.trabalho.content.service;
 
+import com.example.trabalho.content.dto.ContentResponseDTO;
 import com.example.trabalho.content.model.Content;
 import com.example.trabalho.content.model.ContentChange;
 import com.example.trabalho.content.model.ContentHashtag;
@@ -33,7 +34,13 @@ public class ContentService {
     private final HashtagService hashtagService;
 
     @Transactional
-    public Content createContent(String title, String body, Boolean published, List<String> rawHashtags, Long ownerId) {
+    public ContentResponseDTO createContent(
+            String title,
+            String body,
+            Boolean published,
+            List<String> rawHashtags,
+            Long ownerId) {
+
         User owner = userRepository.findById(ownerId)
                 .orElseThrow(() -> new EntityNotFoundException("Usuário proprietário não encontrado."));
 
@@ -53,21 +60,32 @@ public class ContentService {
         }
 
         registerChange(savedContent, owner, "Criação inicial do documento");
-        return savedContent;
+
+        return ContentResponseDTO.fromEntity(savedContent);
     }
 
     @Transactional
-    public Content updateContent(Long contentId, String title, String body, String changeDescription, Long editorId, Long expectedVersion) {
-        Content content = getContentById(contentId);
+    public ContentResponseDTO updateContent(
+            Long contentId,
+            String title,
+            String body,
+            String changeDescription,
+            Long editorId,
+            Long expectedVersion) {
+
+        Content content = findContentEntityById(contentId);
+
         User editor = userRepository.findById(editorId)
                 .orElseThrow(() -> new EntityNotFoundException("Usuário editor não encontrado."));
 
         if (!canEdit(content, editorId)) {
-            throw new AccessDeniedException("Apenas o proprietário ou colaboradores autorizados podem editar este conteúdo.");
+            throw new AccessDeniedException(
+                    "Apenas o proprietário ou colaboradores autorizados podem editar este conteúdo.");
         }
 
         if (expectedVersion != null && !expectedVersion.equals(content.getVersion())) {
-            throw new OptimisticLockException("Conflito de edição detectado: o documento foi modificado por outro usuário enquanto você editava.");
+            throw new OptimisticLockException(
+                    "Conflito de edição detectado: o documento foi modificado por outro usuário enquanto você editava.");
         }
 
         if (title != null && !title.isBlank()) {
@@ -83,12 +101,12 @@ public class ContentService {
                 : "Atualização de conteúdo";
         registerChange(updated, editor, desc);
 
-        return updated;
+        return ContentResponseDTO.fromEntity(updated);
     }
 
     @Transactional
     public void deleteContent(Long contentId, Long requesterId) {
-        Content content = getContentById(contentId);
+        Content content = findContentEntityById(contentId);
         if (!content.getOwner().getId().equals(requesterId)) {
             throw new AccessDeniedException("Apenas o proprietário original pode excluir este documento.");
         }
@@ -96,37 +114,42 @@ public class ContentService {
     }
 
     @Transactional(readOnly = true)
-    public Content getContentById(Long contentId) {
-        return contentRepository.findById(contentId)
-                .orElseThrow(() -> new EntityNotFoundException("Documento não encontrado."));
+    public ContentResponseDTO getContentById(Long contentId) {
+        Content content = findContentEntityById(contentId);
+        return ContentResponseDTO.fromEntity(content);
     }
 
     @Transactional(readOnly = true)
-    public Page<Content> listUserOwnContents(Long ownerId, Pageable pageable) {
-        return contentRepository.findByOwnerId(ownerId, pageable);
+    public Page<ContentResponseDTO> listUserOwnContents(Long ownerId, Pageable pageable) {
+        return contentRepository.findByOwnerId(ownerId, pageable)
+                .map(ContentResponseDTO::fromEntity);
     }
 
     @Transactional(readOnly = true)
-    public Page<Content> explorePublishedContents(Pageable pageable) {
-        return contentRepository.findByPublishedTrue(pageable);
+    public Page<ContentResponseDTO> explorePublishedContents(Pageable pageable) {
+        return contentRepository.findByPublishedTrue(pageable)
+                .map(ContentResponseDTO::fromEntity);
     }
 
     @Transactional(readOnly = true)
-    public Page<Content> searchByKeyword(String keyword, Pageable pageable) {
-        return contentRepository.searchByKeyword(keyword, pageable);
+    public Page<ContentResponseDTO> searchByKeyword(String keyword, Pageable pageable) {
+        return contentRepository.searchByKeyword(keyword, pageable)
+                .map(ContentResponseDTO::fromEntity);
     }
 
     @Transactional(readOnly = true)
-    public Page<Content> searchByHashtags(List<String> hashtags, Pageable pageable) {
+    public Page<ContentResponseDTO> searchByHashtags(List<String> hashtags, Pageable pageable) {
         List<String> normalized = hashtags.stream()
                 .map(hashtagService::normalizeTag)
                 .collect(Collectors.toList());
-        return contentRepository.findByHashtags(normalized, pageable);
+
+        return contentRepository.findByHashtags(normalized, pageable)
+                .map(ContentResponseDTO::fromEntity);
     }
 
     @Transactional
     public void addHashtagToContent(Long contentId, String rawTag, Long requesterId) {
-        Content content = getContentById(contentId);
+        Content content = findContentEntityById(contentId);
         if (!canEdit(content, requesterId)) {
             throw new AccessDeniedException("Sem permissão para alterar hashtags deste documento.");
         }
@@ -142,7 +165,7 @@ public class ContentService {
 
     @Transactional
     public void removeHashtagFromContent(Long contentId, Long hashtagId, Long requesterId) {
-        Content content = getContentById(contentId);
+        Content content = findContentEntityById(contentId);
         if (!canEdit(content, requesterId)) {
             throw new AccessDeniedException("Sem permissão para remover hashtags deste documento.");
         }
@@ -166,5 +189,10 @@ public class ContentService {
 
     public boolean canEdit(Content content, Long userId) {
         return content.getOwner().getId().equals(userId);
+    }
+
+    private Content findContentEntityById(Long contentId) {
+        return contentRepository.findById(contentId)
+                .orElseThrow(() -> new EntityNotFoundException("Documento não encontrado."));
     }
 }

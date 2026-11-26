@@ -1,5 +1,4 @@
-
-package com.example.trabalho.SecurityModule;
+package com.example.trabalho.security.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -20,48 +19,68 @@ public class JwtService {
     private final SecretKey secretKey;
     private final long expiration;
 
-    public JwtService(
-            @Value("${jwt.secret}") String secret,
-            @Value("${jwt.expiration:86400000}") long expiration
-    ) {
+    public JwtService(JwtProperties jwtProperties) {
         this.secretKey = Keys.hmacShaKeyFor(
-                Decoders.BASE64.decode(secret)
+                Decoders.BASE64.decode(jwtProperties.getSecret())
         );
 
-        this.expiration = expiration;
+        this.expiration = jwtProperties.getExpiration();
     }
 
-    // Gerar token JWT
+    /**
+     * Gera um token JWT para o usuário autenticado.
+     */
     public String generateToken(UserDetails userDetails) {
 
-        Date now = new Date();
+        Date issuedAt = new Date();
         Date expirationDate = new Date(
-                now.getTime() + expiration
+                issuedAt.getTime() + expiration
         );
 
         return Jwts.builder()
                 .subject(userDetails.getUsername())
-                .issuedAt(now)
+                .issuedAt(issuedAt)
                 .expiration(expirationDate)
                 .signWith(secretKey)
                 .compact();
     }
 
-    // Extrair o usuário identificado pelo token
+    /**
+     * Extrai o identificador do usuário (email).
+     */
     public String extractUsername(String token) {
         return extractClaims(token).getSubject();
     }
 
-    // Validar token
+    /**
+     * Extrai a data de expiração do token.
+     */
+    public Date extractExpiration(String token) {
+        return extractClaims(token).getExpiration();
+    }
+
+    /**
+     * Retorna o tempo de validade configurado em milissegundos.
+     */
+    public long getExpiration() {
+        return expiration;
+    }
+
+    /**
+     * Verifica se o token corresponde ao usuário autenticado
+     * e se ainda está dentro do prazo de validade.
+     */
     public boolean isTokenValid(
             String token,
             UserDetails userDetails
     ) {
-
         try {
             Claims claims = extractClaims(token);
 
-            return claims.getSubject().equals(userDetails.getUsername())
+            return claims.getSubject().equals(
+                    userDetails.getUsername()
+            )
+                    && claims.getExpiration() != null
                     && claims.getExpiration().after(new Date());
 
         } catch (JwtException | IllegalArgumentException e) {
@@ -69,7 +88,12 @@ public class JwtService {
         }
     }
 
-    // Extrair informações do token
+    /**
+     * Extrai e valida as informações do token.
+     *
+     * A biblioteca verifica automaticamente a assinatura
+     * e a expiração durante o processamento.
+     */
     private Claims extractClaims(String token) {
 
         return Jwts.parser()

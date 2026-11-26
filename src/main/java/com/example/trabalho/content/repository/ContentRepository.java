@@ -22,7 +22,7 @@ public interface ContentRepository extends JpaRepository<Content, Long> {
 
     @Query("SELECT c FROM Content c WHERE c.published = true AND " +
             "(LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-            "LOWER(c.body) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+            "LOWER(CAST(c.body AS string)) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Content> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
     @Query("SELECT DISTINCT c FROM Content c JOIN c.hashtags ch JOIN ch.hashtag h " +
