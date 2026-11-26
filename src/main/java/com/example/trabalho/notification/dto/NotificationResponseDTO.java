@@ -1,5 +1,6 @@
-package com.example.trabalho.notification;
+package com.example.trabalho.notification.dto;
 
+import com.example.trabalho.notification.model.NotificationType;
 import lombok.Builder;
 import lombok.Data;
 

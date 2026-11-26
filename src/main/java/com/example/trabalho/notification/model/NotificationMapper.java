@@ -1,5 +1,6 @@
-package com.example.trabalho.notification;
+package com.example.trabalho.notification.model;
 
+import com.example.trabalho.notification.dto.NotificationResponseDTO;
 import org.springframework.stereotype.Component;
 
 @Component

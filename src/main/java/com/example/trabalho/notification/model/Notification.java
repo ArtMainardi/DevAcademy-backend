@@ -1,4 +1,4 @@
-package com.example.trabalho.notification;
+package com.example.trabalho.notification.model;
 
 import jakarta.persistence.*;
 import lombok.*;

@@ -1,4 +1,4 @@
-package com.example.trabalho.notification;
+package com.example.trabalho.notification.model;
 
 public enum NotificationType {
     LIKE,

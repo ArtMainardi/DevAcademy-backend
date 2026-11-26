@@ -1,5 +1,7 @@
-package com.example.trabalho.notification;
+package com.example.trabalho.notification.repository;
 
+import com.example.trabalho.notification.model.NotificationType;
+import com.example.trabalho.notification.model.Notification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

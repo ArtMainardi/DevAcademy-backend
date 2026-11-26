@@ -1,5 +1,9 @@
-package com.example.trabalho.notification;
+package com.example.trabalho.notification.controller;
 
+import com.example.trabalho.notification.model.Notification;
+import com.example.trabalho.notification.model.NotificationMapper;
+import com.example.trabalho.notification.dto.NotificationResponseDTO;
+import com.example.trabalho.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
