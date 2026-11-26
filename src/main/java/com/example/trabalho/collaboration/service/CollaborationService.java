@@ -1,5 +1,7 @@
 package com.example.trabalho.collaboration.service;
 
+import com.example.trabalho.collaboration.dto.CollaboratorResponseDTO;
+import com.example.trabalho.collaboration.dto.InviteResponseDTO;
 import com.example.trabalho.collaboration.enums.InviteStatus;
 import com.example.trabalho.collaboration.model.CollaborationInvite;
 import com.example.trabalho.collaboration.model.ContentCollaborator;
@@ -27,12 +29,14 @@ public class CollaborationService {
     private final UserRepository userRepository;
 
     @Transactional
-    public CollaborationInvite sendInvite(Long contentId, Long senderId, Long recipientId) {
+    public InviteResponseDTO sendInvite(Long contentId, Long senderId, Long recipientId) {
         Content content = contentRepository.findById(contentId)
                 .orElseThrow(() -> new EntityNotFoundException("Documento não encontrado."));
 
         if (!content.getOwner().getId().equals(senderId)) {
-            throw new AccessDeniedException("Apenas o proprietário do documento pode enviar convites de colaboração.");
+            throw new AccessDeniedException(
+                    "Apenas o proprietário do documento pode enviar convites de colaboração."
+            );
         }
 
         if (senderId.equals(recipientId)) {
@@ -41,14 +45,21 @@ public class CollaborationService {
 
         User sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new EntityNotFoundException("Remetente não encontrado."));
+
         User recipient = userRepository.findById(recipientId)
                 .orElseThrow(() -> new EntityNotFoundException("Usuário destinatário não encontrado."));
 
         if (collaboratorRepository.existsByContentIdAndUserIdAndActiveTrue(contentId, recipientId)) {
-            throw new IllegalStateException("Este usuário já é um colaborador ativo deste documento.");
+            throw new IllegalStateException(
+                    "Este usuário já é um colaborador ativo deste documento."
+            );
         }
-        if (inviteRepository.existsByContentIdAndRecipientIdAndStatus(contentId, recipientId, InviteStatus.PENDENTE)) {
-            throw new IllegalStateException("Já existe um convite pendente para este usuário neste documento.");
+
+        if (inviteRepository.existsByContentIdAndRecipientIdAndStatus(
+                contentId, recipientId, InviteStatus.PENDENTE)) {
+            throw new IllegalStateException(
+                    "Já existe um convite pendente para este usuário neste documento."
+            );
         }
 
         CollaborationInvite invite = CollaborationInvite.builder()
@@ -58,34 +69,47 @@ public class CollaborationService {
                 .status(InviteStatus.PENDENTE)
                 .build();
 
-        return inviteRepository.save(invite);
+        CollaborationInvite savedInvite = inviteRepository.save(invite);
+
+        return InviteResponseDTO.fromEntity(savedInvite);
     }
 
     @Transactional(readOnly = true)
-    public List<CollaborationInvite> getReceivedInvites(Long userId) {
-        return inviteRepository.findByRecipientIdOrderBySentAtDesc(userId);
+    public List<InviteResponseDTO> getReceivedInvites(Long userId) {
+        return inviteRepository.findByRecipientIdOrderBySentAtDesc(userId)
+                .stream()
+                .map(InviteResponseDTO::fromEntity)
+                .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<CollaborationInvite> getSentInvites(Long userId) {
-        return inviteRepository.findBySenderIdOrderBySentAtDesc(userId);
+    public List<InviteResponseDTO> getSentInvites(Long userId) {
+        return inviteRepository.findBySenderIdOrderBySentAtDesc(userId)
+                .stream()
+                .map(InviteResponseDTO::fromEntity)
+                .toList();
     }
 
     @Transactional
-    public CollaborationInvite acceptInvite(Long inviteId, Long recipientId) {
+    public InviteResponseDTO acceptInvite(Long inviteId, Long recipientId) {
         CollaborationInvite invite = inviteRepository.findById(inviteId)
                 .orElseThrow(() -> new EntityNotFoundException("Convite não encontrado."));
 
         if (!invite.getRecipient().getId().equals(recipientId)) {
-            throw new AccessDeniedException("Apenas o destinatário pode aceitar este convite.");
+            throw new AccessDeniedException(
+                    "Apenas o destinatário pode aceitar este convite."
+            );
         }
 
         if (collaboratorRepository.existsByContentIdAndUserIdAndActiveTrue(
                 invite.getContent().getId(), recipientId)) {
-            throw new IllegalStateException("Usuário já possui colaboração ativa neste documento.");
+            throw new IllegalStateException(
+                    "Usuário já possui colaboração ativa neste documento."
+            );
         }
 
         invite.accept();
+
         CollaborationInvite savedInvite = inviteRepository.save(invite);
 
         ContentCollaborator collaborator = ContentCollaborator.builder()
@@ -93,54 +117,76 @@ public class CollaborationService {
                 .user(invite.getRecipient())
                 .active(true)
                 .build();
+
         collaboratorRepository.save(collaborator);
 
-        return savedInvite;
+        return InviteResponseDTO.fromEntity(savedInvite);
     }
 
     @Transactional
-    public CollaborationInvite rejectInvite(Long inviteId, Long recipientId) {
+    public InviteResponseDTO rejectInvite(Long inviteId, Long recipientId) {
         CollaborationInvite invite = inviteRepository.findById(inviteId)
                 .orElseThrow(() -> new EntityNotFoundException("Convite não encontrado."));
 
         if (!invite.getRecipient().getId().equals(recipientId)) {
-            throw new AccessDeniedException("Apenas o destinatário pode recusar este convite.");
+            throw new AccessDeniedException(
+                    "Apenas o destinatário pode recusar este convite."
+            );
         }
 
         invite.reject();
-        return inviteRepository.save(invite);
+
+        CollaborationInvite savedInvite = inviteRepository.save(invite);
+
+        return InviteResponseDTO.fromEntity(savedInvite);
     }
 
     @Transactional
-    public CollaborationInvite cancelInvite(Long inviteId, Long senderId) {
+    public InviteResponseDTO cancelInvite(Long inviteId, Long senderId) {
         CollaborationInvite invite = inviteRepository.findById(inviteId)
                 .orElseThrow(() -> new EntityNotFoundException("Convite não encontrado."));
 
         if (!invite.getSender().getId().equals(senderId)) {
-            throw new AccessDeniedException("Apenas o proprietário que enviou o convite pode cancelá-lo.");
+            throw new AccessDeniedException(
+                    "Apenas o proprietário que enviou o convite pode cancelá-lo."
+            );
         }
 
         invite.cancel();
-        return inviteRepository.save(invite);
+
+        CollaborationInvite savedInvite = inviteRepository.save(invite);
+
+        return InviteResponseDTO.fromEntity(savedInvite);
     }
 
     @Transactional(readOnly = true)
-    public List<ContentCollaborator> listCollaborators(Long contentId) {
-        return collaboratorRepository.findByContentIdAndActiveTrue(contentId);
+    public List<CollaboratorResponseDTO> listCollaborators(Long contentId) {
+        return collaboratorRepository.findByContentIdAndActiveTrue(contentId)
+                .stream()
+                .map(CollaboratorResponseDTO::fromEntity)
+                .toList();
     }
 
     @Transactional
-    public void removeCollaborator(Long contentId, Long collaboratorUserId, Long ownerId) {
+    public void removeCollaborator(
+            Long contentId,
+            Long collaboratorUserId,
+            Long ownerId
+    ) {
         Content content = contentRepository.findById(contentId)
                 .orElseThrow(() -> new EntityNotFoundException("Documento não encontrado."));
 
         if (!content.getOwner().getId().equals(ownerId)) {
-            throw new AccessDeniedException("Apenas o proprietário pode remover colaboradores.");
+            throw new AccessDeniedException(
+                    "Apenas o proprietário pode remover colaboradores."
+            );
         }
 
         ContentCollaborator collaborator = collaboratorRepository
                 .findByContentIdAndUserIdAndActiveTrue(contentId, collaboratorUserId)
-                .orElseThrow(() -> new EntityNotFoundException("Colaborador ativo não encontrado neste documento."));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Colaborador ativo não encontrado neste documento."
+                ));
 
         collaborator.setActive(false);
         collaboratorRepository.save(collaborator);
