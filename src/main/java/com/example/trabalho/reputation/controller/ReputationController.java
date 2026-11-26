@@ -1,5 +1,7 @@
-package com.example.trabalho.reputation;
+package com.example.trabalho.reputation.controller;
 
+import com.example.trabalho.reputation.dto.ReputationResponseDTO;
+import com.example.trabalho.reputation.service.ReputationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

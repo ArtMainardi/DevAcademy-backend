@@ -1,5 +1,6 @@
-package com.example.trabalho.reputation;
+package com.example.trabalho.reputation.service;
 
+import com.example.trabalho.reputation.dto.ReputationResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

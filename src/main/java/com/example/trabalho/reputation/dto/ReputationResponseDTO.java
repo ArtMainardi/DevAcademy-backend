@@ -1,4 +1,4 @@
-package com.example.trabalho.reputation;
+package com.example.trabalho.reputation.dto;
 
 import lombok.Builder;
 import lombok.Data;
