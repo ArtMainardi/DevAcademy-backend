@@ -35,4 +35,4 @@ public interface ContentRatingRepository extends JpaRepository<ContentRating, Lo
     List<ContentRating> findByContentIdOrderByCreatedAtDesc(
             Long contentId
     );
-}
+};
