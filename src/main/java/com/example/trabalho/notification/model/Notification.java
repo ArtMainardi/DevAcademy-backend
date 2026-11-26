@@ -1,5 +1,6 @@
 package com.example.trabalho.notification.model;
 
+import com.example.trabalho.user.model.User;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
