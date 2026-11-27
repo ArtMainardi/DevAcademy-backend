@@ -1,6 +1,6 @@
 package com.example.trabalho.interaction.repository;
 
-import com.seuprojeto.model.Comment;
+import com.example.trabalho.interaction.module.Comment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

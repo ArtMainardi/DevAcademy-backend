@@ -1,17 +1,15 @@
 package com.example.trabalho.interaction.service;
 
-import com.seuprojeto.model.User;
-import com.seuprojeto.model.Content;
-import com.seuprojeto.model.Like;
-import com.seuprojeto.model.Comment;
-import com.seuprojeto.model.ContentRating;
-
-import com.seuprojeto.repository.UserRepository;
-import com.seuprojeto.repository.ContentRepository;
-import com.seuprojeto.repository.LikeRepository;
-import com.seuprojeto.repository.CommentRepository;
-import com.seuprojeto.repository.ContentRatingRepository;
-
+import com.example.trabalho.content.model.Content;
+import com.example.trabalho.content.repository.ContentRepository;
+import com.example.trabalho.interaction.module.Comment;
+import com.example.trabalho.interaction.module.ContentRating;
+import com.example.trabalho.interaction.module.Like;
+import com.example.trabalho.interaction.repository.CommentRepository;
+import com.example.trabalho.interaction.repository.ContentRatingRepository;
+import com.example.trabalho.interaction.repository.LikeRepository;
+import com.example.trabalho.user.model.User;
+import com.example.trabalho.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
@@ -290,8 +288,8 @@ public class InteractionService {
             User user,
             Content content) {
 
-        if (content.getUser() != null &&
-                content.getUser().getId().equals(user.getId())) {
+        if (content.getOwner() != null &&
+                content.getOwner().getId().equals(user.getId())) {
 
             throw new IllegalArgumentException(
                     "Você não pode avaliar seu próprio documento."

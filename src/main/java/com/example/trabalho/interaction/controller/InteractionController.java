@@ -2,13 +2,10 @@
 package com.example.trabalho.interaction.controller;
 
 import com.example.trabalho.interaction.dto.*;
-import com.seuprojeto.dto.interaction.*;
-import com.seuprojeto.model.Comment;
-import com.seuprojeto.model.ContentRating;
-import com.seuprojeto.model.Like;
-import com.seuprojeto.security.CustomUserDetails;
-import com.seuprojeto.service.InteractionService;
 
+import com.example.trabalho.interaction.module.Comment;
+import com.example.trabalho.interaction.service.InteractionService;
+import com.example.trabalho.user.model.User;
 import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
@@ -35,7 +32,7 @@ public class InteractionController {
     @PostMapping("/contents/{contentId}/likes")
     public ResponseEntity<InteractionMessageDTO> likeDocument(
             @PathVariable Long contentId,
-            @AuthenticationPrincipal CustomUserDetails user) {
+            @AuthenticationPrincipal User user) {
 
         interactionService.likeDocument(
                 user.getId(),
@@ -52,7 +49,7 @@ public class InteractionController {
     @DeleteMapping("/contents/{contentId}/likes")
     public ResponseEntity<Void> unlikeDocument(
             @PathVariable Long contentId,
-            @AuthenticationPrincipal CustomUserDetails user) {
+            @AuthenticationPrincipal User user) {
 
         interactionService.unlikeDocument(
                 user.getId(),
@@ -71,7 +68,7 @@ public class InteractionController {
     public ResponseEntity<CommentResponseDTO> createComment(
             @PathVariable Long contentId,
             @Valid @RequestBody CommentRequestDTO request,
-            @AuthenticationPrincipal CustomUserDetails user) {
+            @AuthenticationPrincipal User user) {
 
         Comment comment = interactionService.createComment(
                 user.getId(),
@@ -88,7 +85,7 @@ public class InteractionController {
     public ResponseEntity<CommentResponseDTO> updateComment(
             @PathVariable Long commentId,
             @Valid @RequestBody CommentRequestDTO request,
-            @AuthenticationPrincipal CustomUserDetails user) {
+            @AuthenticationPrincipal User user) {
 
         Comment comment = interactionService.updateComment(
                 user.getId(),
@@ -103,7 +100,7 @@ public class InteractionController {
     @DeleteMapping("/comments/{commentId}")
     public ResponseEntity<Void> deleteComment(
             @PathVariable Long commentId,
-            @AuthenticationPrincipal CustomUserDetails user) {
+            @AuthenticationPrincipal User user) {
 
         interactionService.deleteComment(
                 user.getId(),

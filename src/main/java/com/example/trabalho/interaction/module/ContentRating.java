@@ -1,5 +1,7 @@
 package com.example.trabalho.interaction.module;
 
+import com.example.trabalho.content.model.Content;
+import com.example.trabalho.user.model.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -99,9 +101,9 @@ public class ContentRating {
     public boolean isOwner() {
         return this.evaluator != null
                 && this.content != null
-                && this.content.getUser() != null
+                && this.content.getOwner() != null
                 && this.evaluator.getId().equals(
-                this.content.getUser().getId()
+                this.content.getOwner().getId()
         );
     }
 }

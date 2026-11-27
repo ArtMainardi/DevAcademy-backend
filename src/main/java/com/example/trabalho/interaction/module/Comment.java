@@ -1,5 +1,7 @@
 package com.example.trabalho.interaction.module;
 
+import com.example.trabalho.content.model.Content;
+import com.example.trabalho.user.model.User;
 import jakarta.persistence.*;
 import lombok.*;
 
