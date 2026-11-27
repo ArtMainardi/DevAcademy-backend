@@ -1,4 +1,4 @@
-package com.example.trabalho;
+package com.example.trabalho.correction;
 
 import java.time.LocalDateTime;
 import java.util.EnumSet;

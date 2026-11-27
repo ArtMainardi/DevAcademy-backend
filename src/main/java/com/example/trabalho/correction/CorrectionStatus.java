@@ -1,4 +1,4 @@
-package com.example.trabalho;
+package com.example.trabalho.correction;
 
 public enum CorrectionStatus {
     PENDENTE,

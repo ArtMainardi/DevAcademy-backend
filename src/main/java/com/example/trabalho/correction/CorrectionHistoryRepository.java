@@ -1,4 +1,4 @@
-package com.example.trabalho;
+package com.example.trabalho.correction;
 
 import com.seuprojeto.model.CorrectionHistory;
 import org.springframework.data.jpa.repository.JpaRepository;

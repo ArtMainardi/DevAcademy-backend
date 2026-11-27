@@ -1,4 +1,4 @@
-package com.example.trabalho;
+package com.example.trabalho.correction;
 
 import com.seuprojeto.model.CorrectionRequest;
 import com.seuprojeto.model.enums.CorrectionStatus;
