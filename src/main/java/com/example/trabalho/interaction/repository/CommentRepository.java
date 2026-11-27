@@ -1,4 +1,4 @@
-package com.example.trabalho;
+package com.example.trabalho.interaction.repository;
 
 import com.seuprojeto.model.Comment;
 import org.springframework.data.domain.Page;

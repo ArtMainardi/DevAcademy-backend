@@ -1,4 +1,4 @@
-package com.example.trabalho;
+package com.example.trabalho.interaction.service;
 
 import com.seuprojeto.model.User;
 import com.seuprojeto.model.Content;
@@ -16,11 +16,8 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.dao.DataIntegrityViolationException;
 
 import jakarta.persistence.EntityNotFoundException;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

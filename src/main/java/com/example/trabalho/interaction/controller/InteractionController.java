@@ -1,6 +1,7 @@
 
-package com.seuprojeto.controller;
+package com.example.trabalho.interaction.controller;
 
+import com.example.trabalho.interaction.dto.*;
 import com.seuprojeto.dto.interaction.*;
 import com.seuprojeto.model.Comment;
 import com.seuprojeto.model.ContentRating;

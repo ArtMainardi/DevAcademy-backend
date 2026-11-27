@@ -1,4 +1,4 @@
-package com.example.trabalho;
+package com.example.trabalho.interaction.dto;
 
 package com.seuprojeto.dto.interaction;
 
