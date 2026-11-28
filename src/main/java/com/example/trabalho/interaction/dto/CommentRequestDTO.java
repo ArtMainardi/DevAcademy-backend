@@ -1,7 +1,5 @@
 package com.example.trabalho.interaction.dto;
 
-package com.seuprojeto.dto.interaction;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 

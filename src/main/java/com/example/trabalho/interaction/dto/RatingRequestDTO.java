@@ -1,7 +1,5 @@
 package com.example.trabalho.interaction.dto;
 
-package com.seuprojeto.dto.interaction;
-
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;

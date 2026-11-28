@@ -2,6 +2,7 @@ package com.example.trabalho.interaction.service;
 
 import com.example.trabalho.content.model.Content;
 import com.example.trabalho.content.repository.ContentRepository;
+import com.example.trabalho.interaction.dto.CommentResponseDTO;
 import com.example.trabalho.interaction.module.Comment;
 import com.example.trabalho.interaction.module.ContentRating;
 import com.example.trabalho.interaction.module.Like;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityNotFoundException;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +41,7 @@ public class InteractionService {
         User user = findUser(userId);
         Content content = findContent(contentId);
 
-        if (likeRepository.existsByUserIdAndContentId(
+        if (likeRepository.existsByUser_IdAndContent_Id(
                 userId, contentId)) {
             throw new IllegalStateException(
                     "Você já curtiu este documento."
@@ -57,14 +60,14 @@ public class InteractionService {
     @Transactional
     public void unlikeDocument(Long userId, Long contentId) {
 
-        if (!likeRepository.existsByUserIdAndContentId(
+        if (!likeRepository.existsByUser_IdAndContent_Id(
                 userId, contentId)) {
             throw new EntityNotFoundException(
                     "Curtida não encontrada."
             );
         }
 
-        likeRepository.deleteByUserIdAndContentId(
+        likeRepository.deleteByUser_IdAndContent_Id(
                 userId, contentId
         );
     }
@@ -79,7 +82,7 @@ public class InteractionService {
             );
         }
 
-        return likeRepository.countByContentId(contentId);
+        return likeRepository.countByContent_Id(contentId);
     }
 
     // =====================================================
@@ -138,6 +141,23 @@ public class InteractionService {
         validateCommentAuthor(comment, userId);
 
         commentRepository.delete(comment);
+    }
+
+    // Consultar comentários de um documento
+    @Transactional(readOnly = true)
+    public List<CommentResponseDTO> getComments(Long contentId) {
+        return commentRepository.findByContentIdOrderByCreatedAtDesc(contentId)
+                .stream()
+                .map(comment -> CommentResponseDTO.builder()
+                        .id(comment.getId())
+                        .text(comment.getText())
+                        .authorId(comment.getAuthor().getId())
+                        .authorName(comment.getAuthor().getName())
+                        .contentId(comment.getContent().getId())
+                        .createdAt(comment.getCreatedAt())
+                        .updatedAt(comment.getUpdatedAt())
+                        .build())
+                .toList();
     }
 
     // =====================================================
@@ -244,6 +264,18 @@ public class InteractionService {
         return contentRatingRepository.countByContentId(
                 contentId
         );
+    }
+
+    // Consultar avaliações de um documento
+    @Transactional(readOnly = true)
+    public List<ContentRating> getRatings(Long contentId) {
+        if (!contentRepository.existsById(contentId)) {
+            throw new EntityNotFoundException(
+                    "Documento não encontrado."
+            );
+        }
+
+        return contentRatingRepository.findByContentIdOrderByCreatedAtDesc(contentId);
     }
 
     // =====================================================

@@ -1,18 +1,17 @@
-
 package com.example.trabalho.interaction.controller;
 
 import com.example.trabalho.interaction.dto.*;
-
 import com.example.trabalho.interaction.module.Comment;
+import com.example.trabalho.interaction.module.ContentRating;
 import com.example.trabalho.interaction.service.InteractionService;
 import com.example.trabalho.user.model.User;
+import com.example.trabalho.user.service.UserService;
 import jakarta.validation.Valid;
-
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +22,7 @@ import java.util.List;
 public class InteractionController {
 
     private final InteractionService interactionService;
+    private final UserService userService;
 
     // =====================================================
     // CURTIDAS
@@ -32,7 +32,9 @@ public class InteractionController {
     @PostMapping("/contents/{contentId}/likes")
     public ResponseEntity<InteractionMessageDTO> likeDocument(
             @PathVariable Long contentId,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal UserDetails principal) {
+
+        User user = getAuthenticatedUser(principal);
 
         interactionService.likeDocument(
                 user.getId(),
@@ -49,7 +51,9 @@ public class InteractionController {
     @DeleteMapping("/contents/{contentId}/likes")
     public ResponseEntity<Void> unlikeDocument(
             @PathVariable Long contentId,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal UserDetails principal) {
+
+        User user = getAuthenticatedUser(principal);
 
         interactionService.unlikeDocument(
                 user.getId(),
@@ -68,7 +72,9 @@ public class InteractionController {
     public ResponseEntity<CommentResponseDTO> createComment(
             @PathVariable Long contentId,
             @Valid @RequestBody CommentRequestDTO request,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal UserDetails principal) {
+
+        User user = getAuthenticatedUser(principal);
 
         Comment comment = interactionService.createComment(
                 user.getId(),
@@ -85,7 +91,9 @@ public class InteractionController {
     public ResponseEntity<CommentResponseDTO> updateComment(
             @PathVariable Long commentId,
             @Valid @RequestBody CommentRequestDTO request,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal UserDetails principal) {
+
+        User user = getAuthenticatedUser(principal);
 
         Comment comment = interactionService.updateComment(
                 user.getId(),
@@ -100,7 +108,9 @@ public class InteractionController {
     @DeleteMapping("/comments/{commentId}")
     public ResponseEntity<Void> deleteComment(
             @PathVariable Long commentId,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal UserDetails principal) {
+
+        User user = getAuthenticatedUser(principal);
 
         interactionService.deleteComment(
                 user.getId(),
@@ -115,13 +125,9 @@ public class InteractionController {
     public ResponseEntity<List<CommentResponseDTO>> getComments(
             @PathVariable Long contentId) {
 
-        List<CommentResponseDTO> comments =
+        return ResponseEntity.ok(
                 interactionService.getComments(contentId)
-                        .stream()
-                        .map(this::toCommentDTO)
-                        .toList();
-
-        return ResponseEntity.ok(comments);
+        );
     }
 
     // =====================================================
@@ -133,14 +139,15 @@ public class InteractionController {
     public ResponseEntity<RatingResponseDTO> rateDocument(
             @PathVariable Long contentId,
             @Valid @RequestBody RatingRequestDTO request,
-            @AuthenticationPrincipal CustomUserDetails user) {
+            @AuthenticationPrincipal UserDetails principal) {
 
-        ContentRating rating =
-                interactionService.rateDocument(
-                        user.getId(),
-                        contentId,
-                        request.getScore()
-                );
+        User user = getAuthenticatedUser(principal);
+
+        ContentRating rating = interactionService.rateDocument(
+                user.getId(),
+                contentId,
+                request.getScore()
+        );
 
         return ResponseEntity.ok(toRatingDTO(rating));
     }
@@ -150,14 +157,15 @@ public class InteractionController {
     public ResponseEntity<RatingResponseDTO> updateRating(
             @PathVariable Long contentId,
             @Valid @RequestBody RatingRequestDTO request,
-            @AuthenticationPrincipal CustomUserDetails user) {
+            @AuthenticationPrincipal UserDetails principal) {
 
-        ContentRating rating =
-                interactionService.updateRating(
-                        user.getId(),
-                        contentId,
-                        request.getScore()
-                );
+        User user = getAuthenticatedUser(principal);
+
+        ContentRating rating = interactionService.updateRating(
+                user.getId(),
+                contentId,
+                request.getScore()
+        );
 
         return ResponseEntity.ok(toRatingDTO(rating));
     }
@@ -177,11 +185,18 @@ public class InteractionController {
     }
 
     // =====================================================
+    // USUÁRIO AUTENTICADO
+    // =====================================================
+
+    private User getAuthenticatedUser(UserDetails principal) {
+        return userService.getUserByEmail(principal.getUsername());
+    }
+
+    // =====================================================
     // CONVERSORES DE DTO
     // =====================================================
 
     private CommentResponseDTO toCommentDTO(Comment comment) {
-
         return CommentResponseDTO.builder()
                 .id(comment.getId())
                 .text(comment.getText())
@@ -193,9 +208,7 @@ public class InteractionController {
                 .build();
     }
 
-    private RatingResponseDTO toRatingDTO(
-            ContentRating rating) {
-
+    private RatingResponseDTO toRatingDTO(ContentRating rating) {
         return RatingResponseDTO.builder()
                 .id(rating.getId())
                 .score(rating.getScore())

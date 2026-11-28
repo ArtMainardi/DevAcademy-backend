@@ -8,14 +8,14 @@ import org.springframework.stereotype.Repository;
 public interface LikeRepository extends JpaRepository<Like, Long> {
 
     // Verifica se um usuário curtiu determinado documento
-    boolean existsByUserIdAndContentId(Long userId, Long contentId);
+    boolean existsByUser_IdAndContent_Id(Long userId, Long contentId);
 
-    // Conta a quantidade de curtidas de um documento
-    long countByContentId(Long contentId);
+    // Conta as curtidas de um documento
+    long countByContent_Id(Long contentId);
 
     // Conta as curtidas dos documentos de determinado proprietário
-    long countByContentUserId(Long userId);
+    long countByContent_Owner_Id(Long ownerId);
 
     // Remove a curtida de um usuário em determinado documento
-    void deleteByUserIdAndContentId(Long userId, Long contentId);
+    void deleteByUser_IdAndContent_Id(Long userId, Long contentId);
 }

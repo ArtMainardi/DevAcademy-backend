@@ -1,7 +1,5 @@
 package com.example.trabalho.interaction.dto;
 
-package com.seuprojeto.dto.interaction;
-
 import lombok.*;
 
 @Getter
